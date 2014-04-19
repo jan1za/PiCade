@@ -157,6 +157,7 @@ def getCode(device, intf, switch):
       code = "MCPA_"
    else:
       code = "MCPB_"
+
    if (intf == INTFA):
       code = code + "A_"
    else:
@@ -180,38 +181,18 @@ def getCode(device, intf, switch):
       code = code + "0" 
    return code
 
- def updateKeyboard(device, intf, buttonPressed, buttonState):
-   if (device == DEVICE_A):
-      code = "MCPA_"
-   else:
-      code = "MCPB_"
-   if (intf == INTFA):
-      code = code + "A_"
-   else:
-      code = code + "B_"
-  
-   
-   for x in range(0,7):
-     y = 0x80 >> x  
-     if (buttonPresses & y):
-      keyboard_device.emit(DEFINED_KEYS[code + "" + x], buttonState & y)
-   
-   
-   
 #Findout which button was pressed and trigger the input   
 def checkButton(device, intf, intcap):
   buttonPressed = bus.read_byte_data(device, intf)
   buttonValue = bus.read_byte_data(device, intcap)
   
-  updateKeyboard(device, intf, buttonPressed, buttonState):
-  
-  #if (buttonPressed > 0) :
-  #  upDownValue = UP_KEY
-  #  if (buttonValue & buttonPressed > 0):
-  #    upDownValue = DOWN_KEY
-  #  keyboard_device.emit(DEFINED_KEYS[getCode(device, intf, buttonPressed)], upDownValue)
+  if (buttonPressed > 0) :
+    upDownValue = UP_KEY
+    if (buttonValue & buttonPressed > 0):
+      upDownValue = DOWN_KEY
+    keyboard_device.emit(DEFINED_KEYS[getCode(device, intf, buttonPressed)], upDownValue)
 
-#Event Callbacks
+#Event Callback for Pin B	
 def eventOnPinB(channel):
   time.sleep(0.03) #Sleep to cancel out bounce
   checkButton(DEVICE_B, INTFA, INTCAPA)
@@ -221,10 +202,10 @@ def eventOnPinD(channel):
 #Event Callback for Pin A
 def eventOnPinA(channel):
   time.sleep(0.03) #Sleep to cancel out bounce
-  checkButton(DEVICE_A, INTFA, INTCAPA)
+  checkButton(DEVICE_A, INTA, INTCAPA)
 def eventOnPinC(channel):
   time.sleep(0.03) #Sleep to cancel out bounce
-  checkButton(DEVICE_A, INTFB, INTCAPB)
+  checkButton(DEVICE_A, INTB, INTCAPB)
 
 # Initialise the devices
 setup_mcp(DEVICE_A)
@@ -248,7 +229,7 @@ GPIO.add_event_detect(INT_PIN_C, GPIO.BOTH, callback=eventOnPinC, bouncetime=0)
 GPIO.add_event_detect(INT_PIN_D, GPIO.BOTH, callback=eventOnPinD, bouncetime=0)
 
 try:
-  GPIO.wait_for_edge(PIN_SHUTDOWN, GPIO.RISING) # Wait for shutdown on pin 24 
+  GPIO.wait_for_edge(PIN_SHUTDOWN, GPIO.RISING) # Wait for shutdown on pin 23 
 #  while 1:
 #    time.sleep(0.02)
 except KeyboardInterrupt:
