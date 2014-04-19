@@ -192,8 +192,8 @@ def eventOnPinB(channel):
 #Event Callback for Pin A
 def eventOnPinA(channel):
   time.sleep(0.03) #Sleep to cancel out bounce
-  checkButton(DEVICE_A, INTA, INTCAPA)
-  checkButton(DEVICE_A, INTB, INTCAPB)
+  checkButton(DEVICE_A, INTFA, INTCAPA)
+  checkButton(DEVICE_A, INTFB, INTCAPB)
 
 # Initialise the devices
 setup_mcp(DEVICE_A)
