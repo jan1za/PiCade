@@ -1,3 +1,5 @@
+#! /usr/bin/env python
+
 #   Copyright 2014 Jason F Nicholls
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -47,14 +49,14 @@ DEFINED_KEYS = {
     'MCPA_B_5': uinput.KEY_F,		 # Player 2 Down
     'MCPA_B_6': uinput.KEY_D,		 # Player 2 Left
     'MCPA_B_7': uinput.KEY_G,		 # Player 2 Right
-    'MCPB_A_0': uinput.KEY_LEFTCTRL, # Player 1 Fire 1
+    'MCPB_A_0': uinput.KEY_LEFTCTRL,     # Player 1 Fire 1
     'MCPB_A_1': uinput.KEY_LEFTALT,	 # Player 1 Fire 2
     'MCPB_A_2': uinput.KEY_SPACE,	 # Player 1 Fire 3
-    'MCPB_A_3': uinput.KEY_LEFTSHIFT,# Player 1 Fire 4
+    'MCPB_A_3': uinput.KEY_LEFTSHIFT,    # Player 1 Fire 4
     'MCPB_A_4': uinput.KEY_Z,	 	 # Player 1 Fire 5
-    'MCPB_A_5': uinput.KEY_X,	     # Player 1 Fire 6
+    'MCPB_A_5': uinput.KEY_X,	         # Player 1 Fire 6
     'MCPB_A_6': uinput.KEY_SPACE,	 # Not used
-    'MCPB_A_7': uinput.KEY_SPACE,    # Not used
+    'MCPB_A_7': uinput.KEY_SPACE,        # Not used
     'MCPB_B_0': uinput.KEY_A,		 # Player 2 Fire 1
     'MCPB_B_1': uinput.KEY_S,		 # Player 2 Fire 2
     'MCPB_B_2': uinput.KEY_Q,		 # Player 2 Fire 3
@@ -124,11 +126,11 @@ GPIO.setup(PIN_SHUTDOWN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 # Get a handle to the keyboard Python uinput, defining all the keys we will be using
 keyboard_device = uinput.Device([uinput.KEY_5,uinput.KEY_6, uinput.KEY_1, 
     uinput.KEY_2, uinput.KEY_ESC, uinput.KEY_P, 
-	uinput.KEY_ENTER, uinput.KEY_TAB, uinput.KEY_UP, uinput.KEY_DOWN, 
-	uinput.KEY_LEFT, uinput.KEY_RIGHT, uinput.KEY_R, uinput.KEY_F, 
-	uinput.KEY_D, uinput.KEY_G, uinput.KEY_LEFTCTRL, uinput.KEY_LEFTALT, 
-	uinput.KEY_SPACE, uinput.KEY_LEFTSHIFT, uinput.KEY_Z, uinput.KEY_X, 
-	uinput.KEY_A, uinput.KEY_S, uinput.KEY_Q, uinput.KEY_W, uinput.KEY_E, uinput.KEY_C])
+    uinput.KEY_ENTER, uinput.KEY_TAB, uinput.KEY_UP, uinput.KEY_DOWN, 
+    uinput.KEY_LEFT, uinput.KEY_RIGHT, uinput.KEY_R, uinput.KEY_F, 
+    uinput.KEY_D, uinput.KEY_G, uinput.KEY_LEFTCTRL, uinput.KEY_LEFTALT, 
+    uinput.KEY_SPACE, uinput.KEY_LEFTSHIFT, uinput.KEY_Z, uinput.KEY_X, 
+    uinput.KEY_A, uinput.KEY_S, uinput.KEY_Q, uinput.KEY_W, uinput.KEY_E, uinput.KEY_C])
     
 
 # Method to Setup each of the MCP23017 Devices
@@ -152,58 +154,55 @@ def setup_mcp(device_address):
   bus.write_byte_data(device_address, INTCONB, 0x00)
 
 #Translates the device, the control line and the button into a string for lookup
-def getCode(device, intf, switch):
-   if (device == DEVICE_A):
-      code = "MCPA_"
-   else:
-      code = "MCPB_"
-   if (intf == INTFA):
-      code = code + "A_"
-   else:
-      code = code + "B_"
-  
-   if (switch & 0x01):
-      code = code + "7"
-   if (switch & 0x02):
-      code = code + "6"
-   if (switch & 0x04):
-      code = code + "5"
-   if (switch & 0x08):
-      code = code + "4"
-   if (switch & 0x10):
-      code = code + "3"
-   if (switch & 0x20):
-      code = code + "2"
-   if (switch & 0x40):
-      code = code + "1"
-   if (switch & 0x80):
-      code = code + "0" 
-   return code
+#def getCode(device, intf, switch):
+#   if (device == DEVICE_A):
+#      code = "MCPA_"
+#   else:
+#      code = "MCPB_"
+#   if (intf == INTFA):
+#      code = code + "A_"
+#   else:
+#      code = code + "B_"
+#  
+#   if (switch & 0x01):
+#      code = code + "7"
+#   if (switch & 0x02):
+#      code = code + "6"
+#   if (switch & 0x04):
+#      code = code + "5"
+#   if (switch & 0x08):
+#      code = code + "4"
+#   if (switch & 0x10):
+#      code = code + "3"
+#   if (switch & 0x20):
+#      code = code + "2"
+#   if (switch & 0x40):
+#      code = code + "1"
+#   if (switch & 0x80):
+#      code = code + "0" 
+#   return code
 
- def updateKeyboard(device, intf, buttonPressed, buttonState):
-   if (device == DEVICE_A):
-      code = "MCPA_"
-   else:
-      code = "MCPB_"
-   if (intf == INTFA):
-      code = code + "A_"
-   else:
-      code = code + "B_"
-  
+def setKeys(device, intf, buttonPressed, buttonState):
+  if (device == DEVICE_A):
+    code = "MCPA_"
+  else:
+    code = "MCPB_"
+  if (intf == INTFA):
+    code = code + "A_"
+  else:
+    code = code + "B_"
    
-   for x in range(0,7):
-     y = 0x80 >> x  
-     if (buttonPresses & y):
-      keyboard_device.emit(DEFINED_KEYS[code + "" + x], buttonState & y)
-   
-   
-   
+  for x in range(0,7):
+    y = 0x80 >> x  
+    if (buttonPressed & y):
+       keyboard_device.emit(DEFINED_KEYS[code + str(x)], buttonState & y)
+
 #Findout which button was pressed and trigger the input   
 def checkButton(device, intf, intcap):
   buttonPressed = bus.read_byte_data(device, intf)
   buttonValue = bus.read_byte_data(device, intcap)
   
-  updateKeyboard(device, intf, buttonPressed, buttonState):
+  setKeys(device, intf, buttonPressed, buttonValue)
   
   #if (buttonPressed > 0) :
   #  upDownValue = UP_KEY
