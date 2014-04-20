@@ -41,14 +41,14 @@ DEFINED_KEYS = {
     'MCPA_A_5': uinput.KEY_P,  		 # Pause
     'MCPA_A_6': uinput.KEY_ENTER, 	 # Enter  
     'MCPA_A_7': uinput.KEY_TAB, 	 # Tab - Access in game menu
-    'MCPA_B_0': uinput.KEY_UP,  	 # Player 1 Up
-    'MCPA_B_1': uinput.KEY_DOWN, 	 # Player 1 Down
-    'MCPA_B_2': uinput.KEY_LEFT,	 # Player 1 Left
-    'MCPA_B_3': uinput.KEY_RIGHT, 	 # Player 1 Right
-    'MCPA_B_4': uinput.KEY_R,		 # Player 2 Up
-    'MCPA_B_5': uinput.KEY_F,		 # Player 2 Down
-    'MCPA_B_6': uinput.KEY_D,		 # Player 2 Left
-    'MCPA_B_7': uinput.KEY_G,		 # Player 2 Right
+    'MCPA_B_0': uinput.KEY_G,  	 	 # Player 2 Right
+    'MCPA_B_1': uinput.KEY_D, 	 	 # Player 2 Left
+    'MCPA_B_2': uinput.KEY_F,	 	 # Player 2 Down
+    'MCPA_B_3': uinput.KEY_R, 	 	 # Player 2 UP
+    'MCPA_B_4': uinput.KEY_RIGHT,	 # Player 1 Right
+    'MCPA_B_5': uinput.KEY_LEFT,	 # Player 1 Left
+    'MCPA_B_6': uinput.KEY_DOWN,	 # Player 1 Down
+    'MCPA_B_7': uinput.KEY_UP,		 # Player 1 Up
     'MCPB_A_0': uinput.KEY_LEFTCTRL,     # Player 1 Fire 1
     'MCPB_A_1': uinput.KEY_LEFTALT,	 # Player 1 Fire 2
     'MCPB_A_2': uinput.KEY_SPACE,	 # Player 1 Fire 3
@@ -57,14 +57,14 @@ DEFINED_KEYS = {
     'MCPB_A_5': uinput.KEY_X,	         # Player 1 Fire 6
     'MCPB_A_6': uinput.KEY_SPACE,	 # Not used
     'MCPB_A_7': uinput.KEY_SPACE,        # Not used
-    'MCPB_B_0': uinput.KEY_A,		 # Player 2 Fire 1
-    'MCPB_B_1': uinput.KEY_S,		 # Player 2 Fire 2
-    'MCPB_B_2': uinput.KEY_Q,		 # Player 2 Fire 3
-    'MCPB_B_3': uinput.KEY_W,		 # Player 2 Fire 4
-    'MCPB_B_4': uinput.KEY_E,		 # Player 2 Fire 5 // Normally Joystick 4 and is not set by default
-    'MCPB_B_5': uinput.KEY_C,		 # Player 2 Fire 6 // Normally Joystick 5 and is not set by default
-    'MCPB_B_6': uinput.KEY_SPACE,	 # Not used
-    'MCPB_B_7': uinput.KEY_SPACE,	 # Not used
+    'MCPB_B_0': uinput.KEY_SPACE,	 # Not Used
+    'MCPB_B_1': uinput.KEY_SPACE,	 # Not Used
+    'MCPB_B_2': uinput.KEY_C,		 # C Player 2 Fire 6 // Normally Joystick 4 and is not set by default
+    'MCPB_B_3': uinput.KEY_E,		 # E Player 2 Fire 5 // Normally Joystick 5 and is not set by default
+    'MCPB_B_4': uinput.KEY_W,		 # W Player 2 Fire 4 // Normally Joystick 4 and is not set by default
+    'MCPB_B_5': uinput.KEY_Q,		 # Q Player 2 Fire 3 // Normally Joystick 5 and is not set by default
+    'MCPB_B_6': uinput.KEY_S,	 	 # S Player 2 Fire 2
+    'MCPB_B_7': uinput.KEY_A,	 	 # A Player 2 Fire 1
   }
 
 # Setup Variables and Constants
