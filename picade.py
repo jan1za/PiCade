@@ -113,7 +113,7 @@ DOWN_KEY  = 1 # Constant representing a push key value - required by uinput
 UP_KEY    = 0 # Constant representing a release key value - required by uinput
 
 #Buttons state
-lastButtonState = array.array('i', [UP_KEY] * 32)
+lastButtonState = [UP_KEY for i in range(0,32)]
 
 # Initialize PI Pins
 GPIO.setmode(GPIO.BCM)
@@ -167,26 +167,27 @@ def setKeys(device, intf, buttonPressed, buttonState):
   # to MCPA_A_0 - MCPA_A_7 would be 0-7, while MCPB_B_0 - MCPB_B_7 would be 24-31
   if (device == DEVICE_A):
     code = "MCPA_"
-	lookup = 0
+    lookup = 0
   else:
     code = "MCPB_"
-	lookup = 16
+    lookup = 16
   if (intf == INTFA):
     code = code + "A_"
   else:
     code = code + "B_"
-	lookup = lookup + 8
+    lookup = lookup + 8
    
   for x in range(0,8):
     y = 0x80 >> x  
-	upDownValue = UP_KEY
+    upDownValue = UP_KEY
     if (buttonState & y > 0):
       upDownValue = DOWN_KEY
-	lookup = lookup + x
-    if (lastButtonState[lookup] != upDownValue):	
-	  print "Searching ", code , " - ", y, " pressed ", (buttonPressed & y), " up down ", (buttonState & y), " history ", lastButtonState[lookup], " lookup ", lookup
-	  keyboard_device.emit(DEFINED_KEYS[code + str(x)], upDownValue)
-    lastButtonState[lookup] = upDownValue
+    
+    tmpIndex = lookup + x
+    if (lastButtonState[tmpIndex] != upDownValue):	
+      #print "Searching ", code , " - ", y, " pressed ", (buttonPressed & y), " up down ", (buttonState & y), " history ", lastButtonState[tmpIndex], " lookup ", tmpIndex
+      keyboard_device.emit(DEFINED_KEYS[code + str(x)], upDownValue)
+    lastButtonState[tmpIndex] = upDownValue
        
 
 #Findout which button was pressed and trigger the input   
@@ -202,17 +203,17 @@ def checkButton(device, intf, intcap):
 
 #Event Callbacks
 def eventOnPinB(channel):
-  #time.sleep(0.03) #Sleep to cancel out bounce
+  time.sleep(0.03) #Sleep to cancel out bounce
   checkButton(DEVICE_B, INTFA, INTCAPA)
 def eventOnPinD(channel):
-  #time.sleep(0.03) #Sleep to cancel out bounce
+  time.sleep(0.03) #Sleep to cancel out bounce
   checkButton(DEVICE_B, INTFB, INTCAPB)
 #Event Callback for Pin A
 def eventOnPinA(channel):
-  #time.sleep(0.03) #Sleep to cancel out bounce
+  time.sleep(0.03) #Sleep to cancel out bounce
   checkButton(DEVICE_A, INTFA, INTCAPA)
 def eventOnPinC(channel):
-  #time.sleep(0.03) #Sleep to cancel out bounce
+  time.sleep(0.03) #Sleep to cancel out bounce
   checkButton(DEVICE_A, INTFB, INTCAPB)
 
 # Initialise the devices
