@@ -31,7 +31,8 @@ import uinput
 import smbus
 import time
 
-# Custom Key Configuration, these keys will be mapped to your controls, below are the default MAME Controls.
+# Custom Key Configuration, these keys will be mapped to your controls, 
+# below are the default MAME Controls.
 DEFINED_KEYS = {
     'MCPA_A_0': uinput.KEY_5,      	 # Coin 1
     'MCPA_A_1': uinput.KEY_6,   	 # Coin 2
@@ -49,14 +50,14 @@ DEFINED_KEYS = {
     'MCPA_B_5': uinput.KEY_LEFT,	 # Player 1 Left
     'MCPA_B_6': uinput.KEY_DOWN,	 # Player 1 Down
     'MCPA_B_7': uinput.KEY_UP,		 # Player 1 Up
-    'MCPB_A_0': uinput.KEY_LEFTCTRL,     # Player 1 Fire 1
+    'MCPB_A_0': uinput.KEY_LEFTCTRL, # Player 1 Fire 1
     'MCPB_A_1': uinput.KEY_LEFTALT,	 # Player 1 Fire 2
     'MCPB_A_2': uinput.KEY_SPACE,	 # Player 1 Fire 3
-    'MCPB_A_3': uinput.KEY_LEFTSHIFT,    # Player 1 Fire 4
+    'MCPB_A_3': uinput.KEY_LEFTSHIFT,# Player 1 Fire 4
     'MCPB_A_4': uinput.KEY_Z,	 	 # Player 1 Fire 5
-    'MCPB_A_5': uinput.KEY_X,	         # Player 1 Fire 6
+    'MCPB_A_5': uinput.KEY_X,	     # Player 1 Fire 6
     'MCPB_A_6': uinput.KEY_SPACE,	 # Not used
-    'MCPB_A_7': uinput.KEY_SPACE,        # Not used
+    'MCPB_A_7': uinput.KEY_SPACE,    # Not used
     'MCPB_B_0': uinput.KEY_SPACE,	 # Not Used
     'MCPB_B_1': uinput.KEY_SPACE,	 # Not Used
     'MCPB_B_2': uinput.KEY_C,		 # C Player 2 Fire 6 // Normally Joystick 4 and is not set by default
@@ -66,6 +67,7 @@ DEFINED_KEYS = {
     'MCPB_B_6': uinput.KEY_S,	 	 # S Player 2 Fire 2
     'MCPB_B_7': uinput.KEY_A,	 	 # A Player 2 Fire 1
   }
+
 
 # Setup Variables and Constants
 bus = smbus.SMBus(1) # Rev 2 Pi uses 1, Rev 1 Pi uses 0
@@ -100,27 +102,31 @@ OLATA    = 0x14 #
 OLATB    = 0x15
 
 # Raspberry PI Pins will be used for interrupts
-INT_PIN_B = 17
 INT_PIN_A = 18
-
-INT_PIN_D = 23
+INT_PIN_B = 17
 INT_PIN_C = 22
+INT_PIN_D = 23
 
 PIN_SHUTDOWN = 24 # We dont really need this, but I want to use this later to shut down the pi
 
 DOWN_KEY  = 1 # Constant representing a push key value - required by uinput
 UP_KEY    = 0 # Constant representing a release key value - required by uinput
 
+#Buttons state
+lastButtonState = array.array('i', [UP_KEY] * 32)
+
 # Initialize PI Pins
 GPIO.setmode(GPIO.BCM)
-# We are not using resistors externally so setup the internal pull up resistors for the Pi GPIO Pins, this means the button will pull it down from 3.3V to 0
+# We are not using resistors externally so set-up the internal pull 
+# up resistors for the Pi GPIO Pins, this means the button will pull 
+# it down from 3.3V to 0
 GPIO.setup(INT_PIN_A, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setup(INT_PIN_B, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-
 GPIO.setup(INT_PIN_C, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setup(INT_PIN_D, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
-# We could have done the same above, just put this in to show the difference, here the base is 0 and it will be pulled up to 3.3V is the button is pressed.
+# We could have done the same above, just put this in to show the difference, 
+# here the base is 0 and it will be pulled up to 3.3V is the button is pressed.
 GPIO.setup(PIN_SHUTDOWN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
 # Get a handle to the keyboard Python uinput, defining all the keys we will be using
@@ -153,92 +159,60 @@ def setup_mcp(device_address):
   bus.write_byte_data(device_address, INTCONA, 0x00)
   bus.write_byte_data(device_address, INTCONB, 0x00)
 
-#Translates the device, the control line and the button into a string for lookup
-#def getCode(device, intf, switch):
-#   if (device == DEVICE_A):
-#      code = "MCPA_"
-#   else:
-#      code = "MCPB_"
-#   if (intf == INTFA):
-#      code = code + "A_"
-#   else:
-#      code = code + "B_"
-#  
-#   if (switch & 0x01):
-#      code = code + "7"
-#   if (switch & 0x02):
-#      code = code + "6"
-#   if (switch & 0x04):
-#      code = code + "5"
-#   if (switch & 0x08):
-#      code = code + "4"
-#   if (switch & 0x10):
-#      code = code + "3"
-#   if (switch & 0x20):
-#      code = code + "2"
-#   if (switch & 0x40):
-#      code = code + "1"
-#   if (switch & 0x80):
-#      code = code + "0" 
-#   return code
-
 def setKeys(device, intf, buttonPressed, buttonState):
-  #print "set key"
+  # I used to process only the key that changed, the problem 
+  # is that if the interrupt has fired, but buttons are lifted
+  # it causes deadlock, the virtual state and real state are out of synch
+  # there are 2 chips with 2 banks of 8 options so that's 2 x 2 x 8 or 32 states
+  # to MCPA_A_0 - MCPA_A_7 would be 0-7, while MCPB_B_0 - MCPB_B_7 would be 24-31
   if (device == DEVICE_A):
     code = "MCPA_"
+	lookup = 0
   else:
     code = "MCPB_"
+	lookup = 16
   if (intf == INTFA):
     code = code + "A_"
   else:
     code = code + "B_"
+	lookup = lookup + 8
    
   for x in range(0,8):
     y = 0x80 >> x  
-
-    #print "Searching ", code , " - ", y, " pressed ", (buttonPressed & y), " up down ", (buttonState & y)
-    #if (buttonPressed & y):
-    upDownValue = UP_KEY
+	upDownValue = UP_KEY
     if (buttonState & y > 0):
       upDownValue = DOWN_KEY
-    keyboard_device.emit(DEFINED_KEYS[code + str(x)], upDownValue)
-    
+	lookup = lookup + x
+    if (lastButtonState[lookup] != upDownValue):	
+	  print "Searching ", code , " - ", y, " pressed ", (buttonPressed & y), " up down ", (buttonState & y), " history ", lastButtonState[lookup], " lookup ", lookup
+	  keyboard_device.emit(DEFINED_KEYS[code + str(x)], upDownValue)
+    lastButtonState[lookup] = upDownValue
        
 
 #Findout which button was pressed and trigger the input   
 def checkButton(device, intf, intcap):
   buttonPressed = bus.read_byte_data(device, intf)
   buttonValue = bus.read_byte_data(device, intcap)
-  
-  setKeys(device, intf, buttonPressed, buttonValue)
-  
-  #if (buttonPressed > 0) :
-  #  upDownValue = UP_KEY
-  #  if (buttonValue & buttonPressed > 0):
-  #    upDownValue = DOWN_KEY
-  #  keyboard_device.emit(DEFINED_KEYS[getCode(device, intf, buttonPressed)], upDownValue)
+  if (intf == INTFA):
+    buttonState = bus.read_byte_data(device, GPIOA)
+  else: 
+    buttonState = bus.read_byte_data(device, GPIOB)
+   
+  setKeys(device, intf, buttonPressed, buttonState)
 
 #Event Callbacks
 def eventOnPinB(channel):
-  #print "on B"
-  time.sleep(0.03) #Sleep to cancel out bounce
+  #time.sleep(0.03) #Sleep to cancel out bounce
   checkButton(DEVICE_B, INTFA, INTCAPA)
-  #bus.read_byte_data(DEVICE_B, INTCAPA)
-  #bus.read_byte_data(DEVICE_B, INTCAPB)
 def eventOnPinD(channel):
-  #print "On D"
-  time.sleep(0.03) #Sleep to cancel out bounce
+  #time.sleep(0.03) #Sleep to cancel out bounce
   checkButton(DEVICE_B, INTFB, INTCAPB)
 #Event Callback for Pin A
 def eventOnPinA(channel):
-  #print "On A"
-  time.sleep(0.03) #Sleep to cancel out bounce
+  #time.sleep(0.03) #Sleep to cancel out bounce
   checkButton(DEVICE_A, INTFA, INTCAPA)
-  #bus.read_byte_data(DEVICE_A, INTCAPA)
-  #bus.read_byte_data(DEVICE_A, INTCAPB)
 def eventOnPinC(channel):
-  #print "on C"
-  time.sleep(0.03) #Sleep to cancel out bounce
+  #time.sleep(0.03) #Sleep to cancel out bounce
   checkButton(DEVICE_A, INTFB, INTCAPB)
 
 # Initialise the devices
@@ -257,18 +231,20 @@ bus.read_byte_data(DEVICE_B, INTCAPB)
 # But the MCP23017 will flag the interrupt even though the GPIO Event Detect will ignore
 # the event. No new event will ever be processed because the event INTs must be cleared
 # hence making it 0, means we will always read it, but we wait in the call back just incase
-GPIO.add_event_detect(INT_PIN_A, GPIO.BOTH, callback=eventOnPinA, bouncetime=0) 
-GPIO.add_event_detect(INT_PIN_B, GPIO.BOTH, callback=eventOnPinB, bouncetime=0)
-GPIO.add_event_detect(INT_PIN_C, GPIO.BOTH, callback=eventOnPinC, bouncetime=0) 
-GPIO.add_event_detect(INT_PIN_D, GPIO.BOTH, callback=eventOnPinD, bouncetime=0)
+GPIO.add_event_detect(INT_PIN_A, GPIO.BOTH, callback=eventOnPinA) 
+GPIO.add_event_detect(INT_PIN_B, GPIO.BOTH, callback=eventOnPinB)
+GPIO.add_event_detect(INT_PIN_C, GPIO.BOTH, callback=eventOnPinC) 
+GPIO.add_event_detect(INT_PIN_D, GPIO.BOTH, callback=eventOnPinD)
 
 try:
   GPIO.wait_for_edge(PIN_SHUTDOWN, GPIO.RISING) # Wait for shutdown on pin 24 
-#  while 1:
-#    time.sleep(0.02)
 except KeyboardInterrupt:
   GPIO.cleanup()    
   
+GPIO.remove_event_detect(INT_PIN_A) 
+GPIO.remove_event_detect(INT_PIN_B) 
+GPIO.remove_event_detect(INT_PIN_C) 
+GPIO.remove_event_detect(INT_PIN_D)  
 GPIO.cleanup()
 
 print "Done"
